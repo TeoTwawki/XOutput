@@ -1,12 +1,12 @@
 import { DebugRequest, MessageBase, PongResponse } from '@xoutput/api';
 
 export class WebSocketService {
-  connect(path: string, onMessage: (data: MessageBase) => void): Promise<WebSocketSessionImpl> {
+  connect(path: string, onMessage: (data: MessageBase) => void): Promise<WSSession> {
     return new Promise((resolve, reject) => {
-      const url = `/websocket/${path}`;
+      const url = `ws://${location.host}/websocket/${path}`;
       const websocket = new WebSocket(url);
       let session: WebSocketSessionImpl;
-      let pingInterval: NodeJS.Timeout;
+      let pingInterval: number;
       websocket.onopen = () => {
         session = new WebSocketSessionImpl(websocket);
         this.onOpen();
@@ -45,7 +45,7 @@ export class WebSocketService {
     const message: string = (event as { message?: string }).message;
     console.error(message);
   }
-  private onClose(interval: NodeJS.Timeout): void {
+  private onClose(interval: number): void {
     console.info('Disconnected websocket from host');
     if (interval) {
       clearInterval(interval);

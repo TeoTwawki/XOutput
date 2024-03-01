@@ -1,6 +1,7 @@
 import './index.scss';
 
-import { render } from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { RootElement } from './ui/RootElement';
 import { gamepadService } from './gamepad/GamepadService';
 import 'typeface-roboto';
@@ -15,6 +16,6 @@ function disableResize() {
 }
 
 disableResize();
-const element = document.createElement('div');
-document.body.appendChild(element);
-render(RootElement, element);
+const element = document.getElementById('root');
+const root = createRoot(element);
+root.render(<RootElement />);

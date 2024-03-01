@@ -2,9 +2,6 @@ name: Build XOutput
 
 env:
   VERSION: 4.0.0
-  SERVER_TARGET: 'net7.0'
-  GUI_TARGET: 'net7.0-windows'
-  SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
 
 on:
   push:
@@ -15,6 +12,10 @@ on:
 jobs:
   build_net:
     runs-on: windows-latest
+    env:
+      SERVER_TARGET: 'net7.0'
+      GUI_TARGET: 'net7.0-windows'
+      SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
 
     steps:
     - name: Checkout
@@ -23,7 +24,7 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '7.0.x'
-    - uses: actions/setup-java@v3.13.0 
+    - uses: actions/setup-java@v4.0.0 
       with:
         distribution: 'zulu'
         java-version: '17'
@@ -84,16 +85,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '20'
     - name: Cache webapp
       uses: actions/cache@v3
       with:
         key: webapp-${{ github.sha }}
         path: ./@xoutput/webapp/webapp
-    - name: Build node
-      run: npm install && npm run lint --workspaces && npm run build --workspaces && npm run test --workspaces
+    - name: Install pnpm
+      run: npm install --global pnpm
+    - name: Install dependencies
+      run: pnpm -r install
+    - name: Run lint
+      run: pnpm -r run lint
+    - name: Build webapp
+      run: pnpm -r --workspace-concurrency=1 run build
+    - name: Test webapp
+      run: pnpm -r test
 
   create_package:
     runs-on: windows-latest
